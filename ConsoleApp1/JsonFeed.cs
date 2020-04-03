@@ -13,57 +13,78 @@ namespace ConsoleApp1
         static string _url = "";
 
         public JsonFeed() { }
-        public JsonFeed(string endpoint, int results)
+        public JsonFeed(string endpoint)
         {
             _url = endpoint;
         }
-        
-		public static string[] GetRandomJokes(string firstname, string lastname, string category)
-		{
-			HttpClient client = new HttpClient();
-			client.BaseAddress = new Uri(_url);
-			string url = "jokes/random";
-			if (category != null)
-			{
-				if (url.Contains('?'))
-					url += "&";
-				else url += "?";
-				url += "category=";
-				url += category;
-			}
 
-            string joke = Task.FromResult(client.GetStringAsync(url).Result).Result;
-
+        public static string[] GetRandomJokes(string firstname, string lastname, string category, int n)
+        {
+            String[] jokes = GetRandomJokes(category, n);
             if (firstname != null && lastname != null)
             {
-                int index = joke.IndexOf("Chuck Norris");
-                string firstPart = joke.Substring(0, index);
-                string secondPart = joke.Substring(0 + index + "Chuck Norris".Length, joke.Length - (index + "Chuck Norris".Length));
-                joke = firstPart + " " + firstname + " " + lastname + secondPart;
+                for (int i = 0; i < jokes.Length; i++)
+                {
+                    jokes[i] = jokeWithRandomName(jokes[i], firstname, lastname);
+                }
             }
-
-            return new string[] { JsonConvert.DeserializeObject<dynamic>(joke).value };
+            return jokes;
         }
 
-        /// <summary>
-        /// returns an object that contains name and surname
-        /// </summary>
-        /// <param name="client2"></param>
-        /// <returns></returns>
-		public static dynamic Getnames()
-		{
-			HttpClient client = new HttpClient();
-			client.BaseAddress = new Uri(_url);
-			var result = client.GetStringAsync("").Result;
-			return JsonConvert.DeserializeObject<dynamic>(result);
-		}
+        public static string[] GetRandomJokes(string cat, int count)
+        {
+            String[] jokes = new String[count];
+            HttpClient client = new HttpClient();
+            client.BaseAddress = new Uri(_url);
+            string url = _url + "jokes/random";
+            if (!string.IsNullOrEmpty(cat))
+            {
+                url += "?category=" + cat;
+            }
+            dynamic jokeObj;
+            for (int i = 0; i < count; i++)
+            {
+                jokeObj = JsonConvert.DeserializeObject<dynamic>(client.GetStringAsync(url).Result);
+                jokes[i] = jokeObj.value.ToString();
+            }
+            return jokes;
+        }
 
-		public static string[] GetCategories()
-		{
-			HttpClient client = new HttpClient();
-			client.BaseAddress = new Uri(_url);
+        // public static string getJoke(string cat)
+        // {
+        //     HttpClient client = new HttpClient();
+        //     client.BaseAddress = new Uri(_url);
+        //     if (cat != null || cat != "")
+        //     {
+        //         cat = "?category=" + cat;
+        //     }
+        //     dynamic jokeObj = JsonConvert.DeserializeObject<dynamic>(client.GetStringAsync("jokes/random/" + cat).Result);
+        //     return jokeObj.value.ToString();
+        // }
 
-			return new string[] { Task.FromResult(client.GetStringAsync("categories").Result).Result };
-		}
+        public static string jokeWithRandomName(string joke, string fName, string lName)
+        {
+            int index = joke.IndexOf("Chuck Norris");
+            string prefix = joke.Substring(0, index);
+            string suffix = joke.Substring(index + "Chuck Norris".Length, joke.Length - (index + "Chuck Norris".Length));
+            string jokeWithRandomName = prefix + "" + fName + " " + lName + suffix;
+            return jokeWithRandomName;
+        }
+
+        public static dynamic Getnames()
+        {
+            HttpClient client = new HttpClient();
+            client.BaseAddress = new Uri(_url);
+            // var result = client.GetStringAsync("").Result;
+            var jsonResult = JsonConvert.DeserializeObject<dynamic>(client.GetStringAsync("").Result);
+            return jsonResult.results[0];
+        }
+
+        public static string[] GetCategories()
+        {
+            HttpClient client = new HttpClient();
+            client.BaseAddress = new Uri(_url);
+            return new string[] { Task.FromResult(client.GetStringAsync("categories").Result).Result };
+        }
     }
 }
