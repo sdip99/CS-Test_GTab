@@ -11,53 +11,169 @@ namespace ConsoleApp1
     class Program
     {
         static string[] results = new string[50];
+
+        static HashSet<string> categories;
         static char key;
         static Tuple<string, string> names;
         static ConsolePrinter printer = new ConsolePrinter();
 
+        static JsonFeed reqObj = new JsonFeed();
         static void Main(string[] args)
         {
-            printer.Value("Press ? to get instructions.").ToString();
+            Console.Clear();
+            printer.Value("Press '?' to get instructions or any key to exit").ToString();
+            printer.Value("----------------------------------------").ToString();
             if (Console.ReadLine() == "?")
             {
+                Console.Clear();
                 while (true)
                 {
-                    printer.Value("Press c to get categories").ToString();
+                    printer.Value("----------------------------------------------------------------").ToString();
+                    printer.Value("Press c to get categories (Type and wait for the response)").ToString();
                     printer.Value("Press r to get random jokes").ToString();
+                    printer.Value("Tired? Press x to exit").ToString();
+                    printer.Value("----------------------------------------------------------------").ToString();
                     GetEnteredKey(Console.ReadKey());
-                    if (key == 'c')
+                    if (key == 'x')
+                    {
+                        Environment.Exit(0);
+                    }
+                    else if (key == 'c')
                     {
                         getCategories();
                         PrintResults();
                     }
-                    if (key == 'r')
+                    else if (key == 'r')
                     {
-                        printer.Value("\nWant to use a random name? y/n").ToString();
-                        GetEnteredKey(Console.ReadKey());
-                        if (key == 'y')
-                            GetNames();
-                        printer.Value("\nWant to specify a category? y/n").ToString();
-                        GetEnteredKey(Console.ReadKey());
-                        string cat = "";
-                        if (key == 'y')
-                        {
-                            printer.Value("\nEnter a category;").ToString();
-                            cat = Console.ReadLine();
-                        }
-                        printer.Value("\nHow many jokes do you want? (1-9)").ToString();
-                        int n = Int32.Parse(Console.ReadLine());
-                        GetRandomJokes(cat, n);
-                        PrintResults();
+                        randomJokeOptionStart();
+                        // printer.Value("\n\nWant to use a random name? y/n (Type and wait for the response)").ToString();
+                        // printer.Value("----------------------------------------").ToString();
+                        // GetEnteredKey(Console.ReadKey());
+                        // if (key == 'y')
+                        //     GetNames();
+                        // else
+                        // {
+                        //     printer.Value("*Invalid option selected. Kindly select from the given option").ToString();
+                        //     continue;
+
+                        // }
+                        // printer.Value("\n\nWant to specify a category? y/n (Type and wait for the response)").ToString();
+                        // printer.Value("----------------------------------------").ToString();
+                        // GetEnteredKey(Console.ReadKey());
+                        // string cat = "";
+                        // if (key == 'y')
+                        // {
+                        //     getCategories();
+                        //     PrintResults();
+                        //     printer.Value("\nType any of the above category and press 'Enter'").ToString();
+                        //     printer.Value("----------------------------------------").ToString();
+                        //     cat = Console.ReadLine();
+                        // }
+                        // printer.Value("\n\nHow many jokes do you want? (1-9)").ToString();
+                        // printer.Value("----------------------------------------").ToString();
+                        // int n = Int32.Parse(Console.ReadLine());
+                        // GetRandomJokes(cat, n);
+                        // PrintJokes();
+                        // break;
+
                     }
-                    names = null;
+                    else
+                    {
+                        Console.Clear();
+                        printer.Value("\n*Invalid option selected. Kindly select from the given option").ToString();
+                    }
+
                 }
+            }
+        }
+
+        private static void randomJokeOptionStart()
+        {
+            printer.Value("\n\nWant to use a random name? y/n (Type and wait for the response)").ToString();
+            printer.Value("----------------------------------------").ToString();
+            GetEnteredKey(Console.ReadKey());
+            if (key == 'y')
+            {
+                GetNames();
+                askCategory();
+            }
+            else if (key == 'n')
+                askCategory();
+            else
+            {
+                Console.Clear();
+                printer.Value("\n*Invalid option selected. Type 'y' or 'n'").ToString();
+                randomJokeOptionStart();
+
+            }
+        }
+
+        private static void askCategory()
+        {
+            printer.Value("\n\nWant to specify a category? y/n (Type and wait for the response)").ToString();
+            printer.Value("----------------------------------------").ToString();
+            GetEnteredKey(Console.ReadKey());
+            string cat = "";
+            if (key == 'y')
+            {
+                getCategories();
+                PrintResults();
+                typeCategory();
+            }
+            else if (key == 'n')
+            {
+                askJokeCount(cat);
+            }
+            else
+            {
+                Console.Clear();
+                printer.Value("*Invalid option selected. Type 'y' or 'n'").ToString();
+                askCategory();
+            }
+        }
+
+        private static void typeCategory()
+        {
+            printer.Value("\nType any of the above category and press 'Enter'").ToString();
+            printer.Value("----------------------------------------").ToString();
+            string cat = Console.ReadLine();
+            if (validateCategory(cat))
+                askJokeCount(cat);
+            else
+            {
+                printer.Value("*Invalid value. Kindly entered any of the above category").ToString();
+                typeCategory();
+            }
+        }
+
+        private static Boolean validateCategory(string val)
+        {
+            return categories.Contains(val);
+        }
+        private static void askJokeCount(string cat)
+        {
+            printer.Value("\n\nHow many jokes do you want? (1-9)").ToString();
+            printer.Value("----------------------------------------").ToString();
+            try
+            {
+                int n = Int32.Parse(Console.ReadLine());
+                GetRandomJokes(cat, n);
+                PrintJokes();
+            }
+            catch (Exception e)
+            {
+                printer.Value("\n" + e.Message + "Enter the value in range of 1 to 9").ToString();
+                askJokeCount(cat);
             }
 
         }
-
         private static void PrintResults()
         {
-            printer.Value("[\n" + string.Join(",\n", results) + "\n]").ToString();
+            printer.Value("\n\n Categories: " + string.Join(",\n", categories.ToArray())).ToString();
+        }
+        private static void PrintJokes()
+        {
+            printer.Value("\nJokes:\n**********\n-> " + string.Join("\n-> ", results) + "\n**********\n").ToString();
         }
 
         private static void GetEnteredKey(ConsoleKeyInfo consoleKeyInfo)
@@ -100,28 +216,45 @@ namespace ConsoleApp1
                 case ConsoleKey.Y:
                     key = 'y';
                     break;
-                default:
+                case ConsoleKey.N:
                     key = 'n';
+                    break;
+                case ConsoleKey.X:
+                    key = 'x';
+                    break;
+                default:
+                    key = 'u';
                     break;
             }
         }
 
         private static void GetRandomJokes(string category, int number)
         {
-            new JsonFeed("https://api.chucknorris.io/");
-            results = JsonFeed.GetRandomJokes(names?.Item1, names?.Item2, category, number);
+            reqObj.setURL("https://api.chucknorris.io/");
+            // JsonFeed jsonReq = new JsonFeed("https://api.chucknorris.io/");
+            if (names?.Item1 != null || names?.Item2 != null)
+            {
+                results = reqObj.GetRandomJokes(names?.Item1, names?.Item2, category, number);
+            }
+            else
+            {
+                results = reqObj.GetRandomJokes(category, number);
+            }
+
         }
 
         private static void getCategories()
         {
-            new JsonFeed("https://api.chucknorris.io/jokes/");
-            results = JsonFeed.GetCategories();
+            reqObj.setURL("https://api.chucknorris.io/jokes/");
+            // new JsonFeed("https://api.chucknorris.io/jokes/");
+            categories = reqObj.GetCategories();
         }
 
         private static void GetNames()
         {
-            new JsonFeed("https://randomuser.me/api/");
-            dynamic result = JsonFeed.Getnames();
+            reqObj.setURL("https://randomuser.me/api/");
+            //new JsonFeed("https://randomuser.me/api/");
+            dynamic result = reqObj.Getnames();
             names = Tuple.Create(result.name.first.ToString(), result.name.last.ToString());
         }
     }

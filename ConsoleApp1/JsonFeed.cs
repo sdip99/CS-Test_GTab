@@ -10,32 +10,40 @@ namespace ConsoleApp1
 {
     class JsonFeed
     {
-        static string _url = "";
+        private string _url = "";
+        private HashSet<string> catSet;
 
+        private HttpClient client;
         public JsonFeed() { }
         public JsonFeed(string endpoint)
         {
             _url = endpoint;
+            this.client = new HttpClient();
+            client.BaseAddress = new Uri(endpoint);
         }
 
-        public static string[] GetRandomJokes(string firstname, string lastname, string category, int n)
+        public void setURL(string url)
+        {
+            this._url = url;
+            this.client = new HttpClient();
+            client.BaseAddress = new Uri(url);
+        }
+
+        public string[] GetRandomJokes(string firstname, string lastname, string category, int n)
         {
             String[] jokes = GetRandomJokes(category, n);
-            if (firstname != null && lastname != null)
+            for (int i = 0; i < jokes.Length; i++)
             {
-                for (int i = 0; i < jokes.Length; i++)
-                {
-                    jokes[i] = jokeWithRandomName(jokes[i], firstname, lastname);
-                }
+                jokes[i] = jokeWithRandomName(jokes[i], firstname, lastname);
             }
             return jokes;
         }
 
-        public static string[] GetRandomJokes(string cat, int count)
+        public string[] GetRandomJokes(string cat, int count)
         {
             String[] jokes = new String[count];
-            HttpClient client = new HttpClient();
-            client.BaseAddress = new Uri(_url);
+            // HttpClient client = new HttpClient();
+            // client.BaseAddress = new Uri(_url);
             string url = _url + "jokes/random";
             if (!string.IsNullOrEmpty(cat))
             {
@@ -62,7 +70,7 @@ namespace ConsoleApp1
         //     return jokeObj.value.ToString();
         // }
 
-        public static string jokeWithRandomName(string joke, string fName, string lName)
+        public string jokeWithRandomName(string joke, string fName, string lName)
         {
             int index = joke.IndexOf("Chuck Norris");
             string prefix = joke.Substring(0, index);
@@ -71,20 +79,19 @@ namespace ConsoleApp1
             return jokeWithRandomName;
         }
 
-        public static dynamic Getnames()
+        public dynamic Getnames()
         {
-            HttpClient client = new HttpClient();
-            client.BaseAddress = new Uri(_url);
+            // HttpClient client = new HttpClient();
+            // client.BaseAddress = new Uri(_url);
             // var result = client.GetStringAsync("").Result;
             var jsonResult = JsonConvert.DeserializeObject<dynamic>(client.GetStringAsync("").Result);
             return jsonResult.results[0];
         }
 
-        public static string[] GetCategories()
+        public HashSet<string> GetCategories()
         {
-            HttpClient client = new HttpClient();
-            client.BaseAddress = new Uri(_url);
-            return new string[] { Task.FromResult(client.GetStringAsync("categories").Result).Result };
+            catSet = JsonConvert.DeserializeObject<HashSet<string>>(client.GetStringAsync("categories").Result);
+            return catSet;
         }
     }
 }
