@@ -10,146 +10,164 @@ namespace ConsoleApp1
 {
     class Program
     {
-        static string[] results = new string[50];
+        static string[] results;
 
         static HashSet<string> categories;
         static char key;
         static Tuple<string, string> names;
         static ConsolePrinter printer = new ConsolePrinter();
 
+        // Creating and utilizing the single request object
         static JsonFeed reqObj = new JsonFeed();
         static void Main(string[] args)
         {
             Console.Clear();
             printer.Value("Press '?' to get instructions or any key to exit").ToString();
-            printer.Value("----------------------------------------").ToString();
+            printer.Value("-------------------------------------------------").ToString();
             if (Console.ReadLine() == "?")
             {
                 Console.Clear();
                 while (true)
                 {
                     printer.Value("----------------------------------------------------------------").ToString();
-                    printer.Value("Press c to get categories (Type and wait for the response)").ToString();
+                    printer.Value("Press c to get categories").ToString();
                     printer.Value("Press r to get random jokes").ToString();
                     printer.Value("Tired? Press x to exit").ToString();
                     printer.Value("----------------------------------------------------------------").ToString();
-                    GetEnteredKey(Console.ReadKey());
-                    if (key == 'x')
+                    GetEnteredKey(Console.ReadLine());
+                    if (key == 'x') // Exit the application for 'x' input
                     {
+                        Console.Clear();
+                        GoodByeMessage();
                         Environment.Exit(0);
                     }
-                    else if (key == 'c')
+                    else if (key == 'c') // Prints the cateegory values for 'c' input
                     {
-                        getCategories();
-                        PrintResults();
+                        // Exception handling, In case of any error while making API call
+                        try
+                        {
+                            getCategories();
+                            Console.Clear();
+                            PrintCategories();
+                        }
+                        catch (Exception e)
+                        {
+                            printer.Value("\n* " + e.Message + " Error occuered while fetching the Categories. Try Again!").ToString();
+                        }
                     }
-                    else if (key == 'r')
+                    else if (key == 'r') // Random joke option ('r') selection
                     {
-                        randomJokeOptionStart();
-                        // printer.Value("\n\nWant to use a random name? y/n (Type and wait for the response)").ToString();
-                        // printer.Value("----------------------------------------").ToString();
-                        // GetEnteredKey(Console.ReadKey());
-                        // if (key == 'y')
-                        //     GetNames();
-                        // else
-                        // {
-                        //     printer.Value("*Invalid option selected. Kindly select from the given option").ToString();
-                        //     continue;
-
-                        // }
-                        // printer.Value("\n\nWant to specify a category? y/n (Type and wait for the response)").ToString();
-                        // printer.Value("----------------------------------------").ToString();
-                        // GetEnteredKey(Console.ReadKey());
-                        // string cat = "";
-                        // if (key == 'y')
-                        // {
-                        //     getCategories();
-                        //     PrintResults();
-                        //     printer.Value("\nType any of the above category and press 'Enter'").ToString();
-                        //     printer.Value("----------------------------------------").ToString();
-                        //     cat = Console.ReadLine();
-                        // }
-                        // printer.Value("\n\nHow many jokes do you want? (1-9)").ToString();
-                        // printer.Value("----------------------------------------").ToString();
-                        // int n = Int32.Parse(Console.ReadLine());
-                        // GetRandomJokes(cat, n);
-                        // PrintJokes();
-                        // break;
-
+                        randomJokeOptionStart(); // ask radom user and category selection
                     }
-                    else
+                    else // Invalid selection - values other than 'c','r','x'
                     {
                         Console.Clear();
                         printer.Value("\n*Invalid option selected. Kindly select from the given option").ToString();
                     }
+                    names = null; // setting names to null for avoiding any possible conflict in the next cycle
+                }
+            }
+            GoodByeMessage(); // Prints goodbye messgae
+        }
+
+
+        /* Starting point for random joke 'r' selection. 
+            This will asks user for any random name user wants to use in the joke*/
+        private static void randomJokeOptionStart()
+        {
+            printer.Value("\n\nWant to use a random name? y/n").ToString();
+            printer.Value("----------------------------------------").ToString();
+            GetEnteredKey(Console.ReadLine());
+            try
+            {
+                if (key == 'y') // 'y' selection
+                {
+                    //API call for getting random user name
+                    GetNames();
+                    // Ask next question
+                    askCategory();
+                }
+                else if (key == 'n') // 'n' selection
+                                     // Ask next question
+                    askCategory();
+                else // Error handling
+                {
+                    Console.Clear();
+                    printer.Value("\n* Invalid option selected. Type 'y' or 'n'").ToString();
+                    randomJokeOptionStart(); // Ask agin for valid input
 
                 }
             }
-        }
-
-        private static void randomJokeOptionStart()
-        {
-            printer.Value("\n\nWant to use a random name? y/n (Type and wait for the response)").ToString();
-            printer.Value("----------------------------------------").ToString();
-            GetEnteredKey(Console.ReadKey());
-            if (key == 'y')
+            catch (Exception e) //Exceotion handling, in case of any error in API call
             {
-                GetNames();
-                askCategory();
-            }
-            else if (key == 'n')
-                askCategory();
-            else
-            {
-                Console.Clear();
-                printer.Value("\n*Invalid option selected. Type 'y' or 'n'").ToString();
+                printer.Value("\n* " + e.Message + " Error occuered while fetching the name. Try Again!").ToString();
                 randomJokeOptionStart();
-
             }
+
         }
 
+
+        /* Asking user for providing the category of the joke*/
         private static void askCategory()
         {
-            printer.Value("\n\nWant to specify a category? y/n (Type and wait for the response)").ToString();
+            printer.Value("\n\nWant to specify a category? y/n").ToString();
             printer.Value("----------------------------------------").ToString();
-            GetEnteredKey(Console.ReadKey());
+            GetEnteredKey(Console.ReadLine());
+
             string cat = "";
-            if (key == 'y')
+            if (key == 'y') // 'y' selection
             {
-                getCategories();
-                PrintResults();
-                typeCategory();
+                typeCategory(); // Ask next question
             }
             else if (key == 'n')
             {
-                askJokeCount(cat);
+                askJokeCount(cat); // 'n' selection would ask next question
             }
-            else
+            else // Error handling
             {
                 Console.Clear();
-                printer.Value("*Invalid option selected. Type 'y' or 'n'").ToString();
-                askCategory();
+                printer.Value("* Invalid option selected. Type 'y' or 'n'").ToString();
+                askCategory(); // Ask agin for valid input
             }
         }
 
+
+        /* Asking user to type the category of the joke*/
         private static void typeCategory()
         {
-            printer.Value("\nType any of the above category and press 'Enter'").ToString();
-            printer.Value("----------------------------------------").ToString();
-            string cat = Console.ReadLine();
-            if (validateCategory(cat))
-                askJokeCount(cat);
-            else
+            try
             {
-                printer.Value("*Invalid value. Kindly entered any of the above category").ToString();
+                getCategories();
+                PrintCategories();// Print category for better user experience
+                printer.Value("\nType any of the above category and press 'Enter'").ToString();
+                printer.Value("----------------------------------------").ToString();
+                string cat = Console.ReadLine();
+                if (validateCategory(cat)) // Validating user input with available category values
+                    askJokeCount(cat); // Ask next question
+                else // Error handling
+                {
+                    Console.Clear();
+                    printer.Value("\n* Invalid value. Kindly entered any of the above category").ToString();
+                    typeCategory(); // Ask agian for valid input
+                }
+            }
+            catch (Exception e) // Exceotion handling, in case of any error in API call
+            {
+                printer.Value("\n* " + e.Message + " Error occuered while fetching the data. Try Again!").ToString();
                 typeCategory();
             }
+
         }
 
+
+        /* Method for checking valid categories */
         private static Boolean validateCategory(string val)
         {
             return categories.Contains(val);
         }
+
+
+        /*  Ask for the number of joke user want to see*/
         private static void askJokeCount(string cat)
         {
             printer.Value("\n\nHow many jokes do you want? (1-9)").ToString();
@@ -157,69 +175,92 @@ namespace ConsoleApp1
             try
             {
                 int n = Int32.Parse(Console.ReadLine());
-                GetRandomJokes(cat, n);
+                GetRandomJokes(cat, n); // Call the API and returns the number of joke
+                Console.Clear();
                 PrintJokes();
             }
-            catch (Exception e)
+            catch (FormatException e) // Error handling
             {
-                printer.Value("\n" + e.Message + "Enter the value in range of 1 to 9").ToString();
-                askJokeCount(cat);
+                printer.Value("\n* " + e.Message + " Enter the value in range of 1 to 9").ToString();
+                askJokeCount(cat); // Ask again for valid input
+            }
+            catch (Exception e) // Error handling for any other exception
+            {
+                printer.Value("\n* " + e.Message + " Error occuered while fetching the jokes. Try Again!").ToString();
+                askJokeCount(cat); // Ask again for valid input
             }
 
         }
-        private static void PrintResults()
+
+
+        /* Method for printing the categories value */
+        private static void PrintCategories()
         {
-            printer.Value("\n\n Categories: " + string.Join(",\n", categories.ToArray())).ToString();
+            printer.Value("\n\nCategories:\n***********\n " + string.Join(",", categories.ToArray()) + "\n").ToString();
         }
+
+
+        /* Method for printing the Goodbye message */
+        private static void GoodByeMessage()
+        {
+            printer.Value("\nAdios, amigos! \n").ToString();
+        }
+
+
+        /* Method for printing the jokes */
         private static void PrintJokes()
         {
             printer.Value("\nJokes:\n**********\n-> " + string.Join("\n-> ", results) + "\n**********\n").ToString();
         }
 
-        private static void GetEnteredKey(ConsoleKeyInfo consoleKeyInfo)
+
+        /* Method for setting the key value based on user in put */
+        private static void GetEnteredKey(string k)
         {
-            switch (consoleKeyInfo.Key)
+            // converting to lower case, in case of any uppercase input
+            string s = k.ToLower();
+            switch (s)
             {
-                case ConsoleKey.C:
+                case "c":
                     key = 'c';
                     break;
-                case ConsoleKey.D0:
-                    key = '0';
-                    break;
-                case ConsoleKey.D1:
+                case "1":
                     key = '1';
                     break;
-                case ConsoleKey.D3:
+                case "2":
+                    key = '2';
+                    break;
+                case "3":
                     key = '3';
                     break;
-                case ConsoleKey.D4:
+                case "4":
                     key = '4';
                     break;
-                case ConsoleKey.D5:
+                case "5":
                     key = '5';
                     break;
-                case ConsoleKey.D6:
+                case "6":
                     key = '6';
                     break;
-                case ConsoleKey.D7:
+                case "7":
                     key = '7';
                     break;
-                case ConsoleKey.D8:
+                case "8":
                     key = '8';
                     break;
-                case ConsoleKey.D9:
+                case "9":
                     key = '9';
                     break;
-                case ConsoleKey.R:
+                case "r":
                     key = 'r';
                     break;
-                case ConsoleKey.Y:
+                case "y":
                     key = 'y';
                     break;
-                case ConsoleKey.N:
+                case "n":
                     key = 'n';
                     break;
-                case ConsoleKey.X:
+                case "x":
                     key = 'x';
                     break;
                 default:
@@ -228,10 +269,12 @@ namespace ConsoleApp1
             }
         }
 
+
+        /* Method for fetching the radom jokes from the API and setting it to string[] object*/
         private static void GetRandomJokes(string category, int number)
         {
+            // setting an object url
             reqObj.setURL("https://api.chucknorris.io/");
-            // JsonFeed jsonReq = new JsonFeed("https://api.chucknorris.io/");
             if (names?.Item1 != null || names?.Item2 != null)
             {
                 results = reqObj.GetRandomJokes(names?.Item1, names?.Item2, category, number);
@@ -243,17 +286,20 @@ namespace ConsoleApp1
 
         }
 
+
+        /* Method for getting the category values from the API and setting it to HashSet<string> object*/
         private static void getCategories()
         {
+        
             reqObj.setURL("https://api.chucknorris.io/jokes/");
-            // new JsonFeed("https://api.chucknorris.io/jokes/");
             categories = reqObj.GetCategories();
         }
 
+
+        /* Method for getting random names from the API and setting (firstName, lastName) to Tuple object */
         private static void GetNames()
         {
             reqObj.setURL("https://randomuser.me/api/");
-            //new JsonFeed("https://randomuser.me/api/");
             dynamic result = reqObj.Getnames();
             names = Tuple.Create(result.name.first.ToString(), result.name.last.ToString());
         }
