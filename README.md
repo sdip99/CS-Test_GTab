@@ -1,27 +1,36 @@
 # README #
 
-As part of your application to FleetCarma, we ask that you complete the following challenge. 
+1.	What’s the application?
 
-### Task 1 - Fix some ugly code ###
+This application is all about getting random number of jokes about the “Chuck Norris”. One can also select the joke categories. It can also print the Chuck Norris joke by replacing the name to a random username.
 
-Imagine yourself working at Joke Company™. This company has an app that gets random Chuck Norris jokes and can substitute other peoples names into the joke instead of Chuck Norris'.
+2.	Things that you need
 
-Your task as a professional developer is to clean up this app and make it something you can be proud of.
+You’ll need following software installed in your machine in order to run the application
 
-*Note: This is NOT a representation of our codebase to be clear. We did have fun crafting this beauty however ;)*
+•	.NET Core – Kindly choose v2.1.X. You can find it here.
+•	Any preferred code Editor of your own
 
-### Task 2 - Write a report ###
+And bunch of excitement to begin with.
 
-Write a document explaining some of the improvements you made to the code, and why you did so.
+3.	List of functionalities:
 
-### What do I need? ###
+This application has multiple functionalities like:
 
-* [.NET Core](https://www.microsoft.com/net/core) - any platform
+•	Listing # of jokes about the Chuck Norris in random category
+•	Listing # of jokes about the Chuck Norris in specific category
+•	Listing # of jokes about the Chuck Norris in random category and replacing “Chuck Norris” string from the joke to random user’s name
+•	Listing # of jokes about the Chuck Norris in specific category and replacing “Chuck Norris” string from the joke to random user’s name
+•	Listing Chuck Norris joke categories 
 
-### Who do I talk to? ###
+4.	APIs used:
+Following APIs were used for the application
+•	Getting random user’s name - https://randomuser.me/api/
+•	Chuck Norris random joke - https://api.chucknorris.io/jokes/random
+•	Chuck Norris joke in specific category - https://api.chucknorris.io/jokes/random?category={category}
+•	Available categories of Chuck Norris joke - https://api.chucknorris.io/jokes/categories
 
-If you have any questions you can email careers@geotab.com
+5.	Want to know more?
+Contact sdip152@gmail.com for more details
 
-### Build status ###
-[![Build status](https://ci.appveyor.com/api/projects/status/lsvryi8ea0n6b4xo?svg=true)](https://ci.appveyor.com/project/fleetcarma/cs-challenge)
 
