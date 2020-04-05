@@ -67,11 +67,8 @@ namespace ConsoleApp1
         /* Method for replacing Chuck norris string from joke to firstName and lastName specified*/
         public string jokeWithRandomName(string joke, string fName, string lName)
         {
-            int index = joke.IndexOf("Chuck Norris");
-            string prefix = joke.Substring(0, index);
-            string suffix = joke.Substring(index + "Chuck Norris".Length, joke.Length - (index + "Chuck Norris".Length));
-            string jokeWithRandomName = prefix + "" + fName + " " + lName + suffix;
-            return jokeWithRandomName;
+            string jokeWithRandomName = joke.Replace("Chuck", fName); // Replace all the Chuck instance from the joke
+            return jokeWithRandomName.Replace("Norris", lName); // Replace all the instance of Norris from the joke and return
         }
 
 

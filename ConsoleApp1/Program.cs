@@ -41,7 +41,6 @@ namespace ConsoleApp1
                         GetEnteredKey(Console.ReadLine());
                         if (key == 'x') // Exit the application for 'x' input
                         {
-                            Console.Clear();
                             GoodByeMessage();
                             Environment.Exit(0);
                         }
@@ -160,7 +159,6 @@ namespace ConsoleApp1
             {
                 int n = Int32.Parse(Console.ReadLine());
                 GetRandomJokes(cat, n); // Call the API and returns the number of joke
-                Console.Clear();
                 PrintJokes();
             }
             catch (FormatException e) // Error handling
@@ -181,6 +179,7 @@ namespace ConsoleApp1
         /* Method for printing the Goodbye message */
         private static void GoodByeMessage()
         {
+            Console.Clear();
             printer.Value("\nAdios, amigos! \n").ToString();
         }
 
@@ -188,6 +187,7 @@ namespace ConsoleApp1
         /* Method for printing the jokes */
         private static void PrintJokes()
         {
+            Console.Clear();
             printer.Value("\nJokes:\n**********\n-> " + string.Join("\n-> ", results) + "\n**********\n").ToString();
         }
 
