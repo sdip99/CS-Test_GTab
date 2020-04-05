@@ -32,6 +32,7 @@ namespace ConsoleApp1
                     // Exception handling, In case of any error
                     try
                     {
+                        names = null; // setting names to null for avoiding any possible conflicts
                         printer.Value("----------------------------------------------------------------").ToString();
                         printer.Value("Press c to get categories").ToString();
                         printer.Value("Press r to get random jokes").ToString();
@@ -59,7 +60,6 @@ namespace ConsoleApp1
                             Console.Clear();
                             printer.Value("\n*Invalid option selected. Kindly select from the given option").ToString();
                         }
-                        names = null; // setting names to null for avoiding any possible conflict in the next cycle
                     }
                     catch (Exception e)
                     {
